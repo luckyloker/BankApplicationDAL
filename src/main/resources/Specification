@@ -1,0 +1,30 @@
+                                            Online banking app
+
+Design and implement a persistence layer for online banking app.
+The application can store user information, like first name, last name, birthday, passport number and tax number.
+Each user can have one or more bank cards.
+A bank cards has a number, expiration day, cvv2 (card verification value), and a balance.
+Each card should be associated with some user. Each payment made by user is also stored in the application.
+A payment holds an information about an amount of money spent, a card that was used to make a payment, and a time when it was done.
+-   An application provides the following functionality:
+        -   to see all payments made by user a certain day
+        -   to load all payments that were made using a certain card
+        -   to find all payments that exceeds a given amount
+
+TODO:
+-   create empty maven project
+-   configure JPA and hibernate
+-   create JPA entities User, Card, Payment
+-   implement one to many relation between User and Card
+-   implement one to many relation between Card and Payment
+-   create and implement UserDao
+        -   implement CRUD operations
+-   create and implement CardDao
+        -   implement CRUD operations
+-   create and implement PaymentDao
+        -   implement CRUD operations
+        -   implement a method List<Payment> findAllByCard(Card cardId)
+        -   implement a method List<Payment> findAllByUser(Long userId)
+        -   implement a method List<Payment> findAllByUserAndDate(Long userId, LocalDate)
+        -   implement a method List<Payment> findAllAmountMoreThan(Long userId, BigDecimal amount)
+
