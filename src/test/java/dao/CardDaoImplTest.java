@@ -43,5 +43,37 @@ class CardDaoImplTest {
         assertNotNull(newUser.getId());
     }
 
+    @Test
+    public void saveCardOnNonExistingUser() {
+        User newUser = TestGenerator.generateUser();
+        Card newCard = TestGenerator.generateCard();
+        assertThrows(BankAppException.class, () -> cardDao.saveCard(newUser, newCard));
+    }
+
+    @Test
+    public void removeCard() {
+        User newUser = TestGenerator.generateUser();
+        userDao.saveUser(newUser);
+        assertNotNull(newUser.getId());
+        Card newCard = TestGenerator.generateCard();
+        cardDao.saveCard(newUser, newCard);
+        assertNotNull(newCard.getId());
+        assertNotNull(newUser.getId());
+        cardDao.removeCard(newCard);
+        Card removedCard = cardDao.findCardById(newCard.getId());
+        assertNull(removedCard);
+        assertThat(newUser.getCards().size(), is(0));
+    }
+
+    @Test
+    public void findCardById() {
+        User newUser = TestGenerator.generateUser();
+        Card newCard = TestGenerator.generateCard();
+        userDao.saveUser(newUser);
+        cardDao.saveCard(newUser, newCard);
+        Card cardFromDb = cardDao.findCardById(newCard.getId());
+        assertThat(newCard.getBalance().intValue(), is(cardFromDb.getBalance().intValue()));
+    }
+
 }
 

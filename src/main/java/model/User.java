@@ -40,7 +40,7 @@ public class User {
 
     @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Card> cards = new HashSet<>(10);
+    private Set<Card> cards;
 
     public void addCard(Card card) {
         card.setUser(this);

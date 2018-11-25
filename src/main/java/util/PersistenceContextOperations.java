@@ -11,7 +11,7 @@ import java.util.function.Function;
 public class PersistenceContextOperations {
     private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("InMemoryH2PersistenceUnit");
 
-    public static void performPersistenceContextOperationWithouReturnData(Consumer<EntityManager> entityManagerConsumer) {
+    public static void performPersistenceContextOperationWithoutReturnData(Consumer<EntityManager> entityManagerConsumer) {
         EntityManager entityManager = emf.createEntityManager();
         entityManager.getTransaction().begin();
         try {

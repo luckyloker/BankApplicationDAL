@@ -7,21 +7,23 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @ToString
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "payment")
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
     @Column(name = "payment_time", nullable = false)
     private LocalDateTime paymentTime;
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "card_id")
     private Card card;
 }

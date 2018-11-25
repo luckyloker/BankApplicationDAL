@@ -31,12 +31,13 @@ public class Card {
     @Column(name = "expiraton_date", nullable = false)
     private LocalDate expirationDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "card")
-    private Set<Payment> payments = new HashSet<>();
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Payment> payments;
 
     public void addPayment(Payment payment) {
         payments.add(payment);

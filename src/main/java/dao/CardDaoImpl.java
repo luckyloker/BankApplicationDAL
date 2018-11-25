@@ -15,7 +15,7 @@ public class CardDaoImpl implements CardDao {
 
     @Override
     public void saveCard(User user, Card card) {
-        performPersistenceContextOperationWithouReturnData(entityManager -> {
+        performPersistenceContextOperationWithoutReturnData(entityManager -> {
             user.addCard(card);
             entityManager.merge(user);
             entityManager.persist(card);
@@ -24,17 +24,23 @@ public class CardDaoImpl implements CardDao {
 
     @Override
     public void removeCard(Card card) {
-        throw new UnsupportedOperationException(); //todo implement method
+        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+            Card removedCard = entityManager.merge(card);
+            User removedCardUser = entityManager.find(User.class, removedCard.getUser().getId());
+            removedCardUser.removeCard(card);
+            entityManager.remove(removedCard);
+        });
     }
 
     @Override
     public Card findCardById(Long id) {
-        throw new UnsupportedOperationException(); //todo implement method
+        return performPersistenceContextOperationWithReturnData(entityManager ->
+                entityManager.find(Card.class, id));
     }
 
     @Override
     public void updateCard(Card card) {
-        throw new UnsupportedOperationException(); //todo implement method
-
+        performPersistenceContextOperationWithoutReturnData(entityManager ->
+                entityManager.merge(card));
     }
 }

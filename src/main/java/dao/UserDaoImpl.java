@@ -15,13 +15,13 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void saveUser(User user) {
-        performPersistenceContextOperationWithouReturnData(entityManager ->
+        performPersistenceContextOperationWithoutReturnData(entityManager ->
                 entityManager.persist(user));
     }
 
     @Override
     public void removeUser(User user) {
-        performPersistenceContextOperationWithouReturnData(entityManager -> {
+        performPersistenceContextOperationWithoutReturnData(entityManager -> {
             User removedUser = entityManager.merge(user);
             entityManager.remove(removedUser);
         });

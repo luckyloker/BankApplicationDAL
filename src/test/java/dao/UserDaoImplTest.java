@@ -88,12 +88,12 @@ class UserDaoImplTest {
     @Test
     void updateUserNotStoredInDb () {
         User newUser = TestGenerator.generateUser();
-//        try {
-//            userDao.updateUser(newUser);
-//        }
-//        catch (Exception e) {
-//            assertEquals(BankAppException.class, e.getClass());
-//        }
-        assertThrows(BankAppException.class, () -> userDao.updateUser(newUser));
+        try {
+            userDao.updateUser(newUser);
+        }
+        catch (Exception e) {
+            assertEquals(BankAppException.class, e.getClass());
+        }
+// assertThrows(BankAppException.class, () -> userDao.updateUser(newUser));
     }
 }
