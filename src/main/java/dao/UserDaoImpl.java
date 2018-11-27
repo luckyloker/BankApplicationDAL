@@ -3,6 +3,8 @@ package dao;
 import model.User;
 
 import javax.persistence.EntityManagerFactory;
+import java.util.List;
+
 import static util.PersistenceContextOperations.*;
 
 public class UserDaoImpl implements UserDao {
@@ -34,8 +36,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void updateUser(User user) {
-        performPersistenceContextOperationWithReturnData(entityManager ->
+    public List<User> findAllUsers() {
+        return performPersistenceContextOperationWithReturnData(entityManager ->
+                entityManager.createQuery("select u from User u", User.class)
+                .getResultList());
+    }
+
+    @Override
+    public User updateUser(User user) {
+        return performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.merge(user));
     }
 }

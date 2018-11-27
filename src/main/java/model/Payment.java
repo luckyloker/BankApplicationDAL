@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(exclude = "card")
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "payment")
@@ -19,11 +19,14 @@ public class Payment {
     @Id
     @GeneratedValue
     private Long id;
+
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
+
     @Column(name = "payment_time", nullable = false)
     private LocalDateTime paymentTime;
-    @ManyToOne
+
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "card_id")
     private Card card;
 }

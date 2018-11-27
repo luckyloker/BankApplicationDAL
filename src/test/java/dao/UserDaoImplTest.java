@@ -2,13 +2,13 @@ package dao;
 
 import exceptions.BankAppException;
 import model.User;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import util.TestGenerator;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -16,16 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class UserDaoImplTest {
-    static EntityManagerFactory emf;
-    static UserDao userDao;
-    @BeforeAll
-    static void setUp() {
+    private EntityManagerFactory emf;
+    private UserDao userDao;
+
+    @BeforeEach
+    void setUp() {
         emf = Persistence.createEntityManagerFactory("InMemoryH2PersistenceUnit");
         userDao = new UserDaoImpl(emf);
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         emf.close();
     }
 
@@ -80,8 +81,9 @@ class UserDaoImplTest {
         User newUser = TestGenerator.generateUser();
         userDao.saveUser(newUser);
         newUser.setFirstName("NEW NAME");
-        userDao.updateUser(newUser);
+        User updatedUser = userDao.updateUser(newUser);
         User userFromDb = userDao.findUserById(newUser.getId());
+        assertThat(updatedUser.getFirstName(), is("NEW NAME"));
         assertThat(userFromDb.getFirstName(), is("NEW NAME"));
     }
 
@@ -95,5 +97,19 @@ class UserDaoImplTest {
             assertEquals(BankAppException.class, e.getClass());
         }
 // assertThrows(BankAppException.class, () -> userDao.updateUser(newUser));
+    }
+
+
+    @Test
+    void findAllUsers() {
+        User user1 = TestGenerator.generateUser();
+        User user2 = TestGenerator.generateUser();
+        User user3 = TestGenerator.generateUser();
+        userDao.saveUser(user1);
+        userDao.saveUser(user2);
+        userDao.saveUser(user3);
+        List<User> usersListFromDb = userDao.findAllUsers();
+        assertThat(user1.getFirstName(), is(usersListFromDb.get(0).getFirstName()));
+        assertThat(user3.getBirthday(), is(usersListFromDb.get(2).getBirthday()));
     }
 }

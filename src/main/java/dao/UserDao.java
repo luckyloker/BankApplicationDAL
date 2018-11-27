@@ -2,6 +2,8 @@ package dao;
 
 import model.User;
 
+import java.util.List;
+
 public interface UserDao {
 
     void saveUser(User user);
@@ -10,5 +12,7 @@ public interface UserDao {
 
     User findUserById(Long id);
 
-    void updateUser(User user);
+    List<User> findAllUsers();
+
+    User updateUser(User user);
 }

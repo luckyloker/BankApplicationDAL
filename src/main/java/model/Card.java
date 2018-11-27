@@ -5,7 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -35,9 +37,10 @@ public class Card {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
     @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Payment> payments;
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Payment> payments = new ArrayList<>();
 
     public void addPayment(Payment payment) {
         payments.add(payment);

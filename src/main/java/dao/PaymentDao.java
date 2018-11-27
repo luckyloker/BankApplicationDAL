@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface PaymentDao {
 
-    void savePayment(Payment payment);
+    void savePayment(Card card, Payment payment);
 
     void removePayment(Payment payment);
 

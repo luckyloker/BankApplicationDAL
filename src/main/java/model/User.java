@@ -38,9 +38,10 @@ public class User {
     @Column(name = "tax_number", nullable = false)
     private Long taxNumber;
 
+    @Builder.Default
     @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Card> cards;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Card> cards = new HashSet<>();
 
     public void addCard(Card card) {
         card.setUser(this);
@@ -48,7 +49,7 @@ public class User {
     }
 
     public void removeCard(Card card) {
-        cards.remove(card);
+        this.cards.remove(card);
         card.setUser(null);
     }
 }

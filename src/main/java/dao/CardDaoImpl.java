@@ -2,8 +2,11 @@ package dao;
 
 import model.Card;
 import model.User;
+
 import static util.PersistenceContextOperations.*;
+
 import javax.persistence.EntityManagerFactory;
+import java.util.List;
 
 public class CardDaoImpl implements CardDao {
 
@@ -16,9 +19,8 @@ public class CardDaoImpl implements CardDao {
     @Override
     public void saveCard(User user, Card card) {
         performPersistenceContextOperationWithoutReturnData(entityManager -> {
-            user.addCard(card);
-            entityManager.merge(user);
-            entityManager.persist(card);
+            User userToAddCard = entityManager.find(User.class, user.getId());
+            userToAddCard.addCard(card);
         });
     }
 
@@ -26,8 +28,8 @@ public class CardDaoImpl implements CardDao {
     public void removeCard(Card card) {
         performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Card removedCard = entityManager.merge(card);
-            User removedCardUser = entityManager.find(User.class, removedCard.getUser().getId());
-            removedCardUser.removeCard(card);
+            User userToRemoveCard = entityManager.find(User.class, removedCard.getUser().getId());
+            userToRemoveCard.removeCard(removedCard);
             entityManager.remove(removedCard);
         });
     }
@@ -42,5 +44,12 @@ public class CardDaoImpl implements CardDao {
     public void updateCard(Card card) {
         performPersistenceContextOperationWithoutReturnData(entityManager ->
                 entityManager.merge(card));
+    }
+
+    @Override
+    public List<Card> findAllCards() {
+        return performPersistenceContextOperationWithReturnData(entityManager ->
+                entityManager.createQuery("select c from Card c", Card.class)
+                        .getResultList());
     }
 }
