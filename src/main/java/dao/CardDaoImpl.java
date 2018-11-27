@@ -2,6 +2,7 @@ package dao;
 
 import model.Card;
 import model.User;
+import util.PersistenceContextOperations;
 
 import static util.PersistenceContextOperations.*;
 
@@ -10,45 +11,45 @@ import java.util.List;
 
 public class CardDaoImpl implements CardDao {
 
-    private EntityManagerFactory emf;
+    private PersistenceContextOperations persistenceUtil;
 
     CardDaoImpl(EntityManagerFactory emf) {
-        this.emf = emf;
+        this.persistenceUtil = new PersistenceContextOperations(emf);
     }
 
     @Override
     public void saveCard(User user, Card card) {
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
-            User userToAddCard = entityManager.find(User.class, user.getId());
-            userToAddCard.addCard(card);
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
+            card.setUser(user);
+            entityManager.persist(card);
         });
     }
 
     @Override
     public void removeCard(Card card) {
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Card removedCard = entityManager.merge(card);
-            User userToRemoveCard = entityManager.find(User.class, removedCard.getUser().getId());
-            userToRemoveCard.removeCard(removedCard);
+//            User userToRemoveCard = entityManager.find(User.class, removedCard.getUser().getId());
+//            userToRemoveCard.removeCard(removedCard);
             entityManager.remove(removedCard);
         });
     }
 
     @Override
     public Card findCardById(Long id) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.find(Card.class, id));
     }
 
     @Override
     public void updateCard(Card card) {
-        performPersistenceContextOperationWithoutReturnData(entityManager ->
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager ->
                 entityManager.merge(card));
     }
 
     @Override
     public List<Card> findAllCards() {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select c from Card c", Card.class)
                         .getResultList());
     }

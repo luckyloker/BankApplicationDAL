@@ -3,6 +3,7 @@ package dao;
 import model.Card;
 import model.Payment;
 import model.User;
+import util.PersistenceContextOperations;
 
 import javax.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
@@ -15,15 +16,16 @@ import java.util.Set;
 import static util.PersistenceContextOperations.*;
 
 public class PaymentDaoImpl implements PaymentDao {
-    EntityManagerFactory emf;
+    private PersistenceContextOperations persistenceUtil;
+
 
     public PaymentDaoImpl(EntityManagerFactory emf) {
-        this.emf = emf;
+        this.persistenceUtil = new PersistenceContextOperations(emf);
     }
 
     @Override
     public void savePayment(Card card, Payment payment) {
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Card paymentCard = entityManager.merge(card);
             paymentCard.addPayment(payment);
         });
@@ -31,7 +33,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
     @Override
     public void removePayment(Payment payment) {
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Payment removedPayment = entityManager.find(Payment.class, payment.getId());
             Card cardToRemovePayment = entityManager.find(Card.class, removedPayment.getCard().getId());
             cardToRemovePayment.removePayment(payment);
@@ -41,19 +43,19 @@ public class PaymentDaoImpl implements PaymentDao {
 
     @Override
     public Payment findPaymentById(Long id) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.find(Payment.class, id));
     }
 
     @Override
     public void updatePayment(Payment payment) {
-        performPersistenceContextOperationWithoutReturnData(entityManager ->
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager ->
                 entityManager.merge(payment));
     }
 
     @Override
     public List<Payment> findAllByCard(Card cardId) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select p from Payment p where p.card.id = :id", Payment.class)
                         .setParameter("id", cardId.getId())
                         .getResultList());
@@ -63,7 +65,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
     @Override
     public List<Payment> findAllByUser(User userId) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select p from Payment p where p.card.user.id = :id", Payment.class)
                         .setParameter("id", userId.getId())
                         .getResultList());
@@ -71,7 +73,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
     @Override
     public List<Payment> findAllByUserAndDate(Long userId, LocalDate date) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select p from Payment p where p.card.user.id = :id and " +
                         "p.paymentTime >= :startTime and p.paymentTime <= :endTime", Payment.class)
                         .setParameter("id", userId)
@@ -82,7 +84,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
     @Override
     public List<Payment> findAllAmountMoreThan(Long userId, BigDecimal amount) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select p from Payment p where p.card.user.id = :id and " +
                         "p.amount >= : amountValue", Payment.class)
                         .setParameter("id", userId)

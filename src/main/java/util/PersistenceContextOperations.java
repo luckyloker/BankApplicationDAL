@@ -4,14 +4,18 @@ import exceptions.BankAppException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PersistenceContextOperations {
-    private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("InMemoryH2PersistenceUnit");
+    private final EntityManagerFactory emf;
 
-    public static void performPersistenceContextOperationWithoutReturnData(Consumer<EntityManager> entityManagerConsumer) {
+    public PersistenceContextOperations(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
+
+
+    public void performPersistenceContextOperationWithoutReturnData(Consumer<EntityManager> entityManagerConsumer) {
         EntityManager entityManager = emf.createEntityManager();
         entityManager.getTransaction().begin();
         try {
@@ -27,7 +31,7 @@ public class PersistenceContextOperations {
         }
     }
 
-    public static <T> T performPersistenceContextOperationWithReturnData(Function<EntityManager, T> entityManagerTFunction) {
+    public <T> T performPersistenceContextOperationWithReturnData(Function<EntityManager, T> entityManagerTFunction) {
         EntityManager entityManager = emf.createEntityManager();
         entityManager.getTransaction().begin();
         try {

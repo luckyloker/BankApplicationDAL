@@ -4,6 +4,7 @@ import exceptions.BankAppException;
 import model.Card;
 import model.User;
 import org.junit.jupiter.api.*;
+import util.PersistenceContextOperations;
 import util.TestGenerator;
 
 import javax.persistence.EntityManagerFactory;
@@ -11,6 +12,7 @@ import javax.persistence.Persistence;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.empty;
 import static util.PersistenceContextOperations.*;
 
 import static org.hamcrest.Matchers.is;
@@ -18,15 +20,17 @@ import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CardDaoImplTest {
-    static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
     private CardDao cardDao;
     private UserDao userDao;
+    private PersistenceContextOperations persistenceUtil;
 
     @BeforeEach
     void setUp() {
         emf = Persistence.createEntityManagerFactory("InMemoryH2PersistenceUnit");
         cardDao = new CardDaoImpl(emf);
         userDao = new UserDaoImpl(emf);
+        persistenceUtil = new PersistenceContextOperations(emf);
     }
 
     @AfterEach
@@ -61,7 +65,7 @@ class CardDaoImplTest {
         cardDao.saveCard(newUser, newCard);
         Card cardFromDb = cardDao.findCardById(newCard.getId());
         assertThat(newCard.getBalance().intValue(), is(cardFromDb.getBalance().intValue()));
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             List<User> cardsList = entityManager.createQuery("select u from User u join fetch u.cards where u.id = :id", User.class)
                     .setParameter("id", newUser.getId())
                     .getResultList();
@@ -78,12 +82,12 @@ class CardDaoImplTest {
         cardDao.saveCard(newUser, newCard);
         assertNotNull(newCard.getId());
         cardDao.removeCard(newCard);
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
-            List<User> cardsList = entityManager.createQuery("select u from User u join fetch u.cards where u.id = :id", User.class)
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
+            User user = entityManager.createQuery("select u from User u left join fetch u.cards where u.id = :id", User.class)
                     .setParameter("id", newUser.getId())
-                    .getResultList();
-            System.out.println(cardsList);
-            assertThat(cardsList.size(), is(0));
+                    .getSingleResult();
+            System.out.println(user);
+            assertThat(user.getCards(), is(empty()));
         });
     }
 
@@ -97,7 +101,7 @@ class CardDaoImplTest {
             cardDao.saveCard(newUser, cardListToAdd.get(i));
         }
         assertThat(cardListToAdd.get(0).getBalance().intValue(), is(cardDao.findCardById(1L).getBalance().intValue()));
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             List<User> cardsList = entityManager.createQuery("select u from User u join fetch u.cards where u.id = :id", User.class)
                     .setParameter("id", newUser.getId())
                     .getResultList();

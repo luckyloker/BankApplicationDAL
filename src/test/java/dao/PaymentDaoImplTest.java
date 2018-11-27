@@ -6,6 +6,7 @@ import model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.PersistenceContextOperations;
 import util.TestGenerator;
 
 import javax.persistence.EntityManagerFactory;
@@ -13,6 +14,7 @@ import javax.persistence.Persistence;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +27,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static util.PersistenceContextOperations.*;
 
 class PaymentDaoImplTest {
-    static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
     private CardDao cardDao;
     private UserDao userDao;
     private PaymentDao paymentDao;
+    private PersistenceContextOperations persistenceUtil;
 
     @BeforeEach
     void setUp() {
@@ -36,7 +39,7 @@ class PaymentDaoImplTest {
         cardDao = new CardDaoImpl(emf);
         userDao = new UserDaoImpl(emf);
         paymentDao = new PaymentDaoImpl(emf);
-
+        persistenceUtil = new PersistenceContextOperations(emf);
     }
 
     @AfterEach
@@ -53,7 +56,7 @@ class PaymentDaoImplTest {
         userDao.saveUser(newUser);
         cardDao.saveCard(newUser, newCard);
         paymentDao.savePayment(newCard, newPayment);
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Card paymentCard = entityManager.find(Card.class, newCard.getId());
             List<Payment> paymentSet = paymentCard.getPayments();
             System.out.println(paymentSet);
@@ -84,7 +87,7 @@ class PaymentDaoImplTest {
         Payment anotherPayment = TestGenerator.generatePayment();
         paymentDao.savePayment(newCard, anotherPayment);
         paymentDao.removePayment(newPayment);
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             Card paymentCard = entityManager.find(Card.class, newCard.getId());
             List<Payment> paymentSet = paymentCard.getPayments();
             System.out.println(paymentSet);
@@ -148,9 +151,11 @@ class PaymentDaoImplTest {
             paymentList.add(TestGenerator.generatePayment());
             paymentDao.savePayment(newCard, paymentList.get(i));
         }
-        List<Payment> paymentListFromDb = paymentDao.findAllByUserAndDate(newUser.getId(), LocalDate.of(1980, 1,1));
+        LocalDateTime date = paymentList.get(0).getPaymentTime();
+        List<Payment> paymentListFromDb = paymentDao.findAllByUserAndDate(newUser.getId(), date.toLocalDate());
         System.out.println(paymentList);
         System.out.println(paymentListFromDb);
+
     }
 
     @Test

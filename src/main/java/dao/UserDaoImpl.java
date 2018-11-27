@@ -1,6 +1,7 @@
 package dao;
 
 import model.User;
+import util.PersistenceContextOperations;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
@@ -9,21 +10,22 @@ import static util.PersistenceContextOperations.*;
 
 public class UserDaoImpl implements UserDao {
 
-    EntityManagerFactory emf;
+    private PersistenceContextOperations persistenceUtil;
 
-    UserDaoImpl(EntityManagerFactory emf) {
-        this.emf = emf;
+    UserDaoImpl(EntityManagerFactory emf)
+    {
+        this.persistenceUtil = new PersistenceContextOperations(emf);
     }
 
     @Override
     public void saveUser(User user) {
-        performPersistenceContextOperationWithoutReturnData(entityManager ->
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager ->
                 entityManager.persist(user));
     }
 
     @Override
     public void removeUser(User user) {
-        performPersistenceContextOperationWithoutReturnData(entityManager -> {
+        persistenceUtil.performPersistenceContextOperationWithoutReturnData(entityManager -> {
             User removedUser = entityManager.merge(user);
             entityManager.remove(removedUser);
         });
@@ -31,20 +33,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User findUserById(Long id) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.find(User.class, id));
     }
 
     @Override
     public List<User> findAllUsers() {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.createQuery("select u from User u", User.class)
                 .getResultList());
     }
 
     @Override
     public User updateUser(User user) {
-        return performPersistenceContextOperationWithReturnData(entityManager ->
+        return persistenceUtil.performPersistenceContextOperationWithReturnData(entityManager ->
                 entityManager.merge(user));
     }
 }
